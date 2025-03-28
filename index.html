@@ -3,106 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Film ve Dizi Öneri Sayfası</title>
+    <title>Film Bilgisi</title>
     <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #121212;
-            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f4f8;
+            margin: 0;
         }
-
+        
+        /* Container for the content */
         .container {
-            margin-top: 50px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 320px;
+            max-width: 90%;
         }
 
+        h2 {
+            color: #333;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+        }
+
+        /* Input field and button styling */
         input {
-            padding: 10px;
-            width: 250px;
-            border-radius: 5px;
-            border: none;
+            width: 90%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #007bff;
         }
 
         button {
-            padding: 10px 15px;
-            margin-left: 10px;
-            background-color: #e50914;
-            color: white;
+            background: #007bff;
+            color: #fff;
             border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            border-radius: 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s;
         }
 
         button:hover {
-            background-color: #ff3d00;
+            background-color: #0056b3;
         }
 
-        #result {
+        /* Movie info styling */
+        .info {
             margin-top: 20px;
-        }
-
-        .movie-card {
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 10px;
-            display: inline-block;
+            font-size: 1.1rem;
+            color: #555;
             text-align: left;
-            margin-top: 20px;
         }
 
-        .movie-card img {
-            width: 200px;
+        img {
+            width: 100%;
+            max-width: 180px;
+            margin-top: 20px;
             border-radius: 10px;
         }
 
-        .movie-card h2 {
-            font-size: 20px;
-            margin: 10px 0;
+        .info p {
+            margin: 8px 0;
+            color: #333;
+        }
+
+        .info strong {
+            color: #007bff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            input {
+                width: 100%;
+            }
+
+            button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>🎬 Film / Dizi Öneri Sayfası 🍿</h1>
-        <input type="text" id="searchInput" placeholder="Film veya dizi adı girin..." />
-        <button onclick="searchMovie()">Ara</button>
-        <div id="result"></div>
+        <h2>Film Bilgisi</h2>
+        <input type="text" id="movieInput" placeholder="Film adı girin">
+        <button onclick="getMovieInfo()">Bilgileri Getir</button>
+        <div class="info" id="movieInfo"></div>
     </div>
 
     <script>
-        function searchMovie() {
-            let movieName = document.getElementById("searchInput").value;
-            let resultDiv = document.getElementById("result");
-
-            if (movieName === "") {
-                resultDiv.innerHTML = "<p>Lütfen bir film veya dizi adı girin.</p>";
+        function getMovieInfo() {
+            const movieName = document.getElementById('movieInput').value;
+            if (!movieName) {
+                alert("Lütfen bir film adı girin!");
                 return;
             }
 
-            let apiUrl = `https://www.omdbapi.com/?t=${movieName}&apikey=a3f8dd67`;
+            const apiKey = "a3f8dd67"; // OMDb API anahtarınız
+            const url = http://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${apiKey};
 
-            fetch(apiUrl)
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.Response === "True") {
-                        resultDiv.innerHTML = `
-                            <div class="movie-card">
-                                <img src="${data.Poster}" alt="${data.Title}">
-                                <h2>${data.Title} (${data.Year})</h2>
-                                <p><strong>Tür:</strong> ${data.Genre}</p>
-                                <p><strong>IMDB:</strong> ${data.imdbRating}</p>
-                            </div>
-                        `;
-                    } else {
-                        resultDiv.innerHTML = "<p>Film veya dizi bulunamadı.</p>";
+                    if (data.Response === "False") {
+                        document.getElementById('movieInfo').innerHTML = "<p>Film bulunamadı.</p>";
+                        return;
                     }
+
+                    const title = data.Title;
+                    const year = data.Year;
+                    const plot = data.Plot;
+                    const poster = data.Poster;
+
+                    document.getElementById('movieInfo').innerHTML = `
+                        <img src="${poster}" alt="Film Posteri">
+                        <p><strong>Başlık:</strong> ${title}</p>
+                        <p><strong>Yıl:</strong> ${year}</p>
+                        <p><strong>Konusu:</strong> ${plot}</p>
+                    `;
                 })
                 .catch(error => {
-                    resultDiv.innerHTML = "<p>Bir hata oluştu.</p>";
-                    console.error(error);
+                    console.error("Hata:", error);
+                    document.getElementById('movieInfo').innerHTML = "<p>Bilgiler alınırken hata oluştu.</p>";
                 });
         }
     </script>
+
 </body>
 </html>
-
