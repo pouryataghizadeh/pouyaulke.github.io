@@ -3,106 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ülkeler ve Bayrakları</title>
+    <title>Film/Dizi Öneri Sayfası</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            margin: 0;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 300px;
+            background-color: #121212;
+            color: white;
         }
+
+        .container {
+            margin-top: 50px;
+        }
+
         input {
-            width: 80%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
+            padding: 10px;
+            width: 250px;
             border-radius: 5px;
+            border: none;
         }
+
         button {
-            background: #007bff;
+            padding: 10px 15px;
+            margin-left: 10px;
+            background-color: #e50914;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
             cursor: pointer;
-            margin-bottom: 10px;
+            border-radius: 5px;
         }
+
         button:hover {
-            background: #0056b3;
+            background-color: #ff3d00;
         }
-        img {
-            width: 100px;
-            height: auto;
-            margin-top: 10px;
+
+        #result {
+            margin-top: 20px;
         }
-        .info {
-            margin-top: 10px;
+
+        .movie-card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .movie-card img {
+            width: 200px;
+            border-radius: 10px;
+        }
+
+        .movie-card h2 {
+            font-size: 20px;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h2>Ülke Bilgileri</h2>
-        <input type="text" id="countryInput" placeholder="Ülke adını girin">
-        <button onclick="getCountryInfo()">Bilgileri Getir</button>
-        <div class="info" id="countryInfo"></div>
+        <h1>🎬 Film / Dizi Öneri Sayfası 🍿</h1>
+        <input type="text" id="searchInput" placeholder="Film veya dizi adı girin..." />
+        <button onclick="searchMovie()">Ara</button>
+        <div id="result"></div>
     </div>
 
     <script>
-        function getCountryInfo() {
-    const countryName = document.getElementById('countryInput').value.trim();
-    if (!countryName) {
-        alert("Lütfen bir ülke adı girin!");
-        return;
-    }
+        function searchMovie() {
+            let movieName = document.getElementById("searchInput").value;
+            let resultDiv = document.getElementById("result");
 
-    const url = https://restcountries.com/v3.1/name/${encodeURIComponent(countryName)}?fullText=true;
-
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Ülke bulunamadı!");
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!data || data.length === 0) {
-                document.getElementById('countryInfo').innerHTML = "<p>Ülke bulunamadı.</p>";
+            if (movieName === "") {
+                resultDiv.innerHTML = "<p>Lütfen bir film veya dizi adı girin.</p>";
                 return;
             }
 
-            const country = data[0];
-            const flag = country.flags?.svg || "https://via.placeholder.com/100";
-            const capital = country.capital ? country.capital[0] : "Bilinmiyor";
-            const population = country.population ? country.population.toLocaleString() : "Bilinmiyor";
-            const languages = country.languages ? Object.values(country.languages).join(", ") : "Bilinmiyor";
+            let apiUrl = `https://www.omdbapi.com/?t=${movieName}&apikey=3c7b3bc0`;
 
-            document.getElementById('countryInfo').innerHTML = `
-                <img src="${flag}" alt="Bayrak">
-                <p><strong>Başkenti:</strong> ${capital}</p>
-                <p><strong>Nüfusu:</strong> ${population}</p>
-                <p><strong>Dilleri:</strong> ${languages}</p>
-            `;
-        })
-        .catch(error => {
-            console.error("Hata:", error);
-            document.getElementById('countryInfo').innerHTML = "<p>Bilgiler alınırken hata oluştu.</p>";
-        });
-}
-            
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Response === "True") {
+                        resultDiv.innerHTML = `
+                            <div class="movie-card">
+                                <img src="${data.Poster}" alt="${data.Title}">
+                                <h2>${data.Title} (${data.Year})</h2>
+                                <p><strong>Tür:</strong> ${data.Genre}</p>
+                                <p><strong>IMDB:</strong> ${data.imdbRating}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = "<p>Film veya dizi bulunamadı.</p>";
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = "<p>Bir hata oluştu.</p>";
+                    console.error(error);
+                });
+        }
     </script>
-
 </body>
 </html>
