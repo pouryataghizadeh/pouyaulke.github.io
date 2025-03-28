@@ -62,40 +62,46 @@
 
     <script>
         function getCountryInfo() {
-            const countryName = document.getElementById('countryInput').value;
-            if (!countryName) {
-                alert("Lütfen bir ülke adı girin!");
+    const countryName = document.getElementById('countryInput').value.trim();
+    if (!countryName) {
+        alert("Lütfen bir ülke adı girin!");
+        return;
+    }
+
+    const url = https://restcountries.com/v3.1/name/${encodeURIComponent(countryName)}?fullText=true;
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Ülke bulunamadı!");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data || data.length === 0) {
+                document.getElementById('countryInfo').innerHTML = "<p>Ülke bulunamadı.</p>";
                 return;
             }
 
-            const url = `https://restcountries.com/v3.1/name/${countryName}?fullText=true`;
+            const country = data[0];
+            const flag = country.flags?.svg || "https://via.placeholder.com/100";
+            const capital = country.capital ? country.capital[0] : "Bilinmiyor";
+            const population = country.population ? country.population.toLocaleString() : "Bilinmiyor";
+            const languages = country.languages ? Object.values(country.languages).join(", ") : "Bilinmiyor";
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 404) {
-                        document.getElementById('countryInfo').innerHTML = "<p>Ülke bulunamadı.</p>";
-                        return;
-                    }
-
-                    const country = data[0];
-                    const flag = country.flags.svg;
-                    const capital = country.capital ? country.capital[0] : "Bilinmiyor";
-                    const population = country.population.toLocaleString();
-                    const languages = country.languages ? Object.values(country.languages).join(", ") : "Bilinmiyor";
-
-                    document.getElementById('countryInfo').innerHTML = `
-                        <img src="${flag}" alt="Bayrak">
-                        <p><strong>Başkenti:</strong> ${capital}</p>
-                        <p><strong>Nüfusu:</strong> ${population}</p>
-                        <p><strong>Dilleri:</strong> ${languages}</p>
-                    `;
-                })
-                .catch(error => {
-                    console.error("Hata:", error);
-                    document.getElementById('countryInfo').innerHTML = "<p>Bilgiler alınırken hata oluştu.</p>";
-                });
-        }
+            document.getElementById('countryInfo').innerHTML = `
+                <img src="${flag}" alt="Bayrak">
+                <p><strong>Başkenti:</strong> ${capital}</p>
+                <p><strong>Nüfusu:</strong> ${population}</p>
+                <p><strong>Dilleri:</strong> ${languages}</p>
+            `;
+        })
+        .catch(error => {
+            console.error("Hata:", error);
+            document.getElementById('countryInfo').innerHTML = "<p>Bilgiler alınırken hata oluştu.</p>";
+        });
+}
+            
     </script>
 
 </body>
