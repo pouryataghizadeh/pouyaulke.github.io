@@ -1,165 +1,106 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Film Bilgisi</title>
+    <title>Anlık Döviz Kurları</title>
     <style>
-        /* Global Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f4f8;
-            margin: 0;
-        }
-        
-        /* Container for the content */
-        .container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 320px;
-            max-width: 90%;
-        }
-
-        h2 {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             color: #333;
-            font-size: 1.6rem;
-            margin-bottom: 20px;
+            text-align: center;
+            padding: 20px;
         }
 
-        /* Input field and button styling */
-        input {
-            width: 90%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
+        h1 {
+            color: #444;
         }
 
-        input:focus {
-            border-color: #007bff;
+        #currency-container {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+
+        #currency-container h3 {
+            margin-bottom: 10px;
+        }
+
+        #currency-container p {
+            font-size: 18px;
         }
 
         button {
-            background: #007bff;
-            color: #fff;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s;
+            margin-top: 20px;
         }
 
         button:hover {
             background-color: #0056b3;
         }
 
-        /* Movie info styling */
-        .info {
+        #error-message {
+            color: red;
             margin-top: 20px;
-            font-size: 1.1rem;
-            color: #555;
-            text-align: left;
-        }
-
-        img {
-            width: 100%;
-            max-width: 180px;
-            margin-top: 20px;
-            border-radius: 10px;
-        }
-
-        .info p {
-            margin: 8px 0;
-            color: #333;
-        }
-
-        .info strong {
-            color: #007bff;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                width: 90%;
-            }
-
-            h2 {
-                font-size: 1.4rem;
-            }
-
-            input {
-                width: 100%;
-            }
-
-            button {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <h2>Film Bilgisi</h2>
-        <input type="text" id="movieInput" placeholder="Film adı girin">
-        <button onclick="getMovieInfo()">Bilgileri Getir</button>
-        <div class="info" id="movieInfo"></div>
+    <h1>Anlık Döviz Kurları</h1>
+    <div id="currency-container">
+        <h3>Döviz Kurları</h3>
+        <p><strong>USD (Amerikan Doları):</strong> <span id="usd-rate">Yükleniyor...</span></p>
+        <p><strong>EUR (Euro):</strong> <span id="eur-rate">Yükleniyor...</span></p>
+        <p><strong>GBP (İngiliz Sterlini):</strong> <span id="gbp-rate">Yükleniyor...</span></p>
+        <button onclick="fetchExchangeRates()">Kurları Yeniden Yükle</button>
     </div>
+    <div id="error-message"></div>
 
     <script>
-        function getMovieInfo() {
-            const movieName = document.getElementById('movieInput').value;
-            if (!movieName) {
-                alert("Lütfen bir film adı girin!");
-                return;
-            }
+        // Döviz kurlarını çekmek için API URL'si
+        const apiUrl = 'https://v6.exchangerate-api.com/v6/YOUR_API_KEY/latest/USD';
 
-            const apiKey = "a3f8dd67"; // OMDb API anahtarınız
-            const url = http://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${apiKey};
+        // Döviz kurlarını alıp sayfada göstermek için fonksiyon
+        function fetchExchangeRates() {
+            const usdRateElem = document.getElementById('usd-rate');
+            const eurRateElem = document.getElementById('eur-rate');
+            const gbpRateElem = document.getElementById('gbp-rate');
+            const errorMessageElem = document.getElementById('error-message');
 
-            fetch(url)
+            // Hata mesajını temizle
+            errorMessageElem.textContent = '';
+
+            // API'yi çağır
+            fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.Response === "False") {
-                        document.getElementById('movieInfo').innerHTML = "<p>Film bulunamadı.</p>";
-                        return;
+                    if (data.result === 'success') {
+                        // Döviz kurlarını güncelle
+                        usdRateElem.textContent = data.conversion_rates.USD.toFixed(2);
+                        eurRateElem.textContent = data.conversion_rates.EUR.toFixed(2);
+                        gbpRateElem.textContent = data.conversion_rates.GBP.toFixed(2);
+                    } else {
+                        errorMessageElem.textContent = 'Döviz kurları yüklenirken bir hata oluştu. Lütfen tekrar deneyin.';
                     }
-
-                    const title = data.Title;
-                    const year = data.Year;
-                    const plot = data.Plot;
-                    const poster = data.Poster;
-
-                    document.getElementById('movieInfo').innerHTML = `
-                        <img src="${poster}" alt="Film Posteri">
-                        <p><strong>Başlık:</strong> ${title}</p>
-                        <p><strong>Yıl:</strong> ${year}</p>
-                        <p><strong>Konusu:</strong> ${plot}</p>
-                    `;
                 })
                 .catch(error => {
-                    console.error("Hata:", error);
-                    document.getElementById('movieInfo').innerHTML = "<p>Bilgiler alınırken hata oluştu.</p>";
+                    errorMessageElem.textContent = 'Bir hata oluştu. Lütfen internet bağlantınızı kontrol edin.';
+                    console.error(error);
                 });
         }
-    </script>
 
+        // Sayfa yüklendiğinde döviz kurlarını çek
+        window.onload = fetchExchangeRates;
+    </script>
 </body>
 </html>
