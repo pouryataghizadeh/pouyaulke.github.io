@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ülkeler ve Bayrakları</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        input {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        img {
+            width: 100px;
+            height: auto;
+            margin-top: 10px;
+        }
+        .info {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Ülke Bilgileri</h2>
+        <input type="text" id="countryInput" placeholder="Ülke adını girin">
+        <button onclick="getCountryInfo()">Bilgileri Getir</button>
+        <div class="info" id="countryInfo"></div>
+    </div>
+
+    <script>
+        function getCountryInfo() {
+            const countryName = document.getElementById('countryInput').value;
+            if (!countryName) {
+                alert("Lütfen bir ülke adı girin!");
+                return;
+            }
+
+            const url = https://restcountries.com/v3.1/name/${countryName}?fullText=true;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 404) {
+                        document.getElementById('countryInfo').innerHTML = "<p>Ülke bulunamadı.</p>";
+                        return;
+                    }
+
+                    const country = data[0];
+                    const flag = country.flags.svg;
+                    const capital = country.capital ? country.capital[0] : "Bilinmiyor";
+                    const population = country.population.toLocaleString();
+                    const languages = country.languages ? Object.values(country.languages).join(", ") : "Bilinmiyor";
+
+                    document.getElementById('countryInfo').innerHTML = `
+                        <img src="${flag}" alt="Bayrak">
+                        <p><strong>Başkenti:</strong> ${capital}</p>
+                        <p><strong>Nüfusu:</strong> ${population}</p>
+                        <p><strong>Dilleri:</strong> ${languages}</p>
+                    `;
+                })
+                .catch(error => {
+                    console.error("Hata:", error);
+                    document.getElementById('countryInfo').innerHTML = "<p>Bilgiler alınırken hata oluştu.</p>";
+                });
+        }
+    </script>
+
+</body>
+</html>
